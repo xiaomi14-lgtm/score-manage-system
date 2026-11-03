@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: scoreqa
+
+  datasource:
+    # 支持通过环境变量覆盖（DB_URL / DB_USERNAME / DB_PASSWORD），未设置时使用默认值。
+    # 若本机 MySQL root 密码不是 root，请设置环境变量 DB_PASSWORD，或直接修改此处与 db.properties。
+    url: ${DB_URL:jdbc:mysql://localhost:3306/scoreqa?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+  # 建表/种子数据脚本（幂等，可重复执行）
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+      continue-on-error: false
+
+  # 说明：本项目为纯 Servlet + JSP，不使用 Spring MVC，
+  # 视图由各 Servlet 通过 RequestDispatcher 转发到 /WEB-INF/jsp/ 下的 JSP，
+  # 因此无需配置 spring.mvc.view。
+
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+# 部署到外部 Tomcat 时，端口与 context-path 由 Tomcat 决定（war 名 scoreqa.war → /scoreqa），
+# 以下 server.* 配置仅在 IDE 直接运行 main 方法（内嵌 Tomcat）时生效。
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+# 应用自定义配置
+app:
+  jwt:
+    secret: scoreqa-demo-jwt-secret-key-change-me-in-production-0123456789
+    expiration: 86400000  # 24小时，单位毫秒
+  upload:
+    dir: uploads/          # 知识库文档上传目录
+  ai:
+    provider: local        # local | openai | dashscope
+    api-key: ""
+    endpoint: ""
+
+logging:
+  level:
+    root: INFO
+    com.demo.scoreqa: DEBUG
